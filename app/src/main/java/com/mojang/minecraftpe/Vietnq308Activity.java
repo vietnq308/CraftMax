@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 //import androidx.test.espresso.core.internal.deps.guava.collect.ImmutableList;
 //
 //import com.android.billingclient.api.AcknowledgePurchaseParams;
@@ -187,6 +188,8 @@ public class Vietnq308Activity {
     //    private boolean isRated = false;
     //    private BillingClient billingClient;
     //    private PurchasesUpdatedListener purchasesUpdatedListener;
+
+    private int numberMarkNativeShowed = 0;
     public Vietnq308Activity(MainActivity mainActivity) {
         this.activity_context = mainActivity;
         fetchingAPIconfig();
@@ -467,7 +470,7 @@ public class Vietnq308Activity {
             Log.i(TAG, "SAVE LOG : |||||||||||||||| " + response );
             editor.apply();
         } catch (Exception e) {
-            String a = "{\"policyMode\":false,\"ironsourceDevKey\":\"X\",\"bannerAdmobId\":\"ca-app-pub-1839004489502882/7289222640\",\"nativeAdmobId\":\"ca-app-pub-1839004489502882/8746859680\",\"openAdsAdmobId\":\"ca-app-pub-1839004489502882/4411831769\",\"interAoaAdsAdmobId\":\"ca-app-pub-1839004489502882/8156431813\",\"interMediationAdsAdmobId\":\"ca-app-pub-1839004489502882/9142210427\",\"interApplovinId\":\"x\",\"bannerApplovinId\":\"x\",\"openApplovinId\":\"x\",\"interIronSourceId\":\"X\",\"isAoaType\":false,\"interFakeAoaType\":1,\"isOnBanner\":false,\"isOnCollapsible\":false,\"isOnNative\":true,\"nativeRefreshTimer\":30,\"interAdsType\":1,\"interAdsDelayTimer\":12,\"interAdsLoopTimer\":189,\"nativeRatioHeightScreen\":0.15,\"nativeRatioWidthScreen\":0.4,\"nativeRatioClick\":1.4}";
+            String a = "{\"policyMode\":true,\"ironsourceDevKey\":\"X\",\"bannerAdmobId\":\"ca-app-pub-2913496970595341/2503657603\",\"nativeAdmobId\":\"ca-app-pub-2913496970595341/6559927469\",\"openAdsAdmobId\":\"ca-app-pub-2913496970595341/9293902016\",\"interAoaAdsAdmobId\":\"ca-app-pub-2913496970595341/2972036244\",\"interMediationAdsAdmobId\":\"ca-app-pub-2913496970595341/4037705907\",\"interApplovinId\":\"x\",\"bannerApplovinId\":\"x\",\"openApplovinId\":\"x\",\"interIronSourceId\":\"X\",\"isAoaType\":true,\"interFakeAoaType\":1,\"isOnBanner\":false,\"isOnCollapsible\":false,\"isOnNative\":true,\"nativeRefreshTimer\":39,\"interAdsType\":1,\"interAdsDelayTimer\":250,\"interAdsLoopTimer\":189,\"nativeRatioHeightScreen\":0.15,\"nativeRatioWidthScreen\":0.4,\"nativeRatioClick\":1.56}";
             Log.i(TAG, "===============FAILED TO PARSE DATA=================\n" + e );
             String retrievedJsonString = sharedPreferences.getString("json_default", jsonDefault);
             if (retrievedJsonString != null) {
@@ -685,15 +688,22 @@ public class Vietnq308Activity {
         Log.i("VIETNQ308", "NATIVE COUNTER ==========   "+ String.valueOf(nativeCounterTimer) + " || native1 status: " + (cacheNativeAd1==null ? "null" : "available") + " || native2 status: " + (cacheNativeAd2==null ? "null" : "available"));
         nativeCounterTimer = nativeCounterTimer - 5000;
         if (nativeCounterTimer < 0 && !is_ads_removed) {
-            if (cacheNativeAd1 != null) {
+            if (cacheNativeAd1 != null && numberMarkNativeShowed == 2) {
                 Log.i("VIETNQ308", "SHOW NATIVE 1");
                 showNativeDialog(cacheNativeAd1);
-            } else if (cacheNativeAd2 != null) {
+            } else if (cacheNativeAd2 != null && numberMarkNativeShowed == 1) {
                 Log.i("VIETNQ308", "SHOW NATIVE 2");
                 showNativeDialog(cacheNativeAd2);
             } else {
-                loadNativeAd1();
-                loadNativeAd2();
+                if (cacheNativeAd1 != null ) {
+                    Log.i("VIETNQ308", "SHOW NATIVE 1");
+                    showNativeDialog(cacheNativeAd1);
+                } else if (cacheNativeAd2 != null ) {
+                    Log.i("VIETNQ308", "SHOW NATIVE 2");
+                    showNativeDialog(cacheNativeAd2);
+                } else {
+                    loadNativeAd1();
+                }
             }
         }
     }
@@ -749,6 +759,9 @@ public class Vietnq308Activity {
 
                             numberRetryNative = 0;
                             cacheNativeAd1 = nativeAd;
+                            if (cacheNativeAd2 == null) {
+                                loadNativeAd2();
+                            }
                             Log.i("VIETNQ308", "LOADED NATIVE1 SUCCESSFULLY");
                         }
                     })
@@ -757,9 +770,10 @@ public class Vietnq308Activity {
                         public void onAdFailedToLoad(LoadAdError adError) {
                             Log.e("VIETNQ308", "FAILED LOAD NATIVE1"+ String.valueOf(adError));
                             numberRetryNative = numberRetryNative +1;
-                            nativeCounterTimer = 10000*numberRetryNative*numberRetryNative;
-                            Log.e("VIETNQ308", "NATIVE1 LOAD AFTER: "+ String.valueOf(nativeCounterTimer) + "TIMES:" +String.valueOf(numberRetryNative));
-
+                            if (nativeCounterTimer < 0 ) {
+                                nativeCounterTimer = 10000*numberRetryNative*numberRetryNative;
+                                Log.e("VIETNQ308", "NATIVE1 LOAD AFTER: "+ String.valueOf(nativeCounterTimer) + "TIMES:" +String.valueOf(numberRetryNative));
+                            }
                         }
                     })
                     .withNativeAdOptions(new NativeAdOptions.Builder().setMediaAspectRatio(MediaAspectRatio.LANDSCAPE).build()).build();
@@ -804,8 +818,10 @@ public class Vietnq308Activity {
                         public void onAdFailedToLoad(LoadAdError adError) {
                             Log.e("VIETNQ308", "FAILED LOAD NATIVE2"+ String.valueOf(adError));
                             numberRetryNative = numberRetryNative +1;
-                            nativeCounterTimer = 10000*numberRetryNative*numberRetryNative;;
-                            Log.e("VIETNQ308", "NATIVE2 LOAD AFTER: "+ String.valueOf(nativeCounterTimer)+ "TIMES:" +String.valueOf(numberRetryNative));
+                            if (nativeCounterTimer < 0 ) {
+                                nativeCounterTimer = 10000*numberRetryNative*numberRetryNative;
+                                Log.e("VIETNQ308", "NATIVE2 LOAD AFTER: "+ String.valueOf(nativeCounterTimer)+ "TIMES:" +String.valueOf(numberRetryNative));
+                            }
                         }
                     })
                     .withNativeAdOptions(new NativeAdOptions.Builder().setMediaAspectRatio(MediaAspectRatio.LANDSCAPE).build()).build();
@@ -857,7 +873,26 @@ public class Vietnq308Activity {
             if (nativeAd.getIcon() != null) {
                 nativeAdView.setIconView(template.findViewById(com.google.android.ads.nativetemplates.R.id.icon));
             }
-//            nativeAdView.setIconView(myButton);
+
+            // clone new native =======================================================
+//            TemplateView myButton = adDialog.findViewById(R.id.my_button);
+//            NativeAd nativeAdClone = nativeAd;
+//            myButton.setStyles(styles);
+//            myButton.setNativeAd(nativeAd);
+//            NativeAdView nativeAdViewClone = myButton.getNativeAdView();
+//            if (nativeAdClone.getIcon() != null) {
+//                nativeAdViewClone.setIconView(myButton.findViewById(com.google.android.ads.nativetemplates.R.id.icon));
+//            }
+//            ConstraintLayout contentBackground = myButton.findViewById(com.google.android.ads.nativetemplates.R.id.content);
+//            try {
+//                nativeAdViewClone.setBodyView(contentBackground);
+//            } catch (Error error) {
+//                Log.e("VIETNQ308", String.valueOf(error));
+//            }
+//            myButton.getLayoutParams().height = (int) (screenHeight*nativeRatioHeightScreen* nativeRatioClick);
+//            myButton.getLayoutParams().width = (int) (screenWidth*nativeRatioWidthScreen* nativeRatioClick);
+//            myButton.requestLayout();
+            // clone new native =======================================================
 
             if (new Random().nextBoolean()) {
                 myButton.setOnClickListener(new View.OnClickListener() {
@@ -884,11 +919,13 @@ public class Vietnq308Activity {
             if (nativeAd == cacheNativeAd1) {
                 cacheNativeAd1 = null;
                 Log.i(TAG, "CLEAR NATIVE 1" );
+                numberMarkNativeShowed = 1;
                 loadNativeAd1();
             } else {
                 cacheNativeAd2 = null;
                 Log.i(TAG, "CLEAR NATIVE 2" );
-                loadNativeAd1();
+                numberMarkNativeShowed = 2;
+                loadNativeAd2();
             }
         } catch (Exception e) {
             Log.e("VIETNQ308", e + "========= EROROROORR");

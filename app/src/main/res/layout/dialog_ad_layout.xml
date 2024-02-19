@@ -17,6 +17,13 @@
         android:layout_height="wrap_content"
         android:gravity="top">
 
+<!--        <com.google.android.ads.nativetemplates.TemplateView-->
+<!--            android:id="@+id/my_button"-->
+<!--            app:gnt_template_type="@layout/gnt_small_template_view"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal"-->
+<!--            android:alpha="0" />-->
         <View
             android:id="@+id/my_button"
             android:layout_width="wrap_content"
@@ -24,6 +31,7 @@
             android:text=""
             android:alpha="0"
             android:layout_gravity="center_horizontal" />
+
         <com.google.android.ads.nativetemplates.TemplateView
             android:id="@+id/my_template"
             app:gnt_template_type="@layout/gnt_small_template_view"
