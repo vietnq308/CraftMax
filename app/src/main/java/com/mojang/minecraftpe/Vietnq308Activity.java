@@ -72,6 +72,7 @@ import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public class Vietnq308Activity {
     private static String bannerAdmobId = "";
     private static String mrecAdmobId = "";
     private static String nativeAdmobId = "";
-//    private static String nativeAdmobId2 = "";
+    //    private static String nativeAdmobId2 = "";
 //    private static String nativeAdmobId3 = "";
 //    private static String nativeAdmobId4 = "";
 //    private static String nativeAdmobId5 = "";
@@ -149,7 +150,7 @@ public class Vietnq308Activity {
     private AdView adView;
 
     private AdView adBannerView;
-    private static String jsonDefault = "{\"ironsourceDevKey\":\"X\",\"bannerAdmobId\":\"ca-app-pub-1839004489502882/1454660236\",\"nativeAdmobId1\":\"ca-app-pub-1839004489502882/6516300670\",\"nativeAdmobId2\":\"ca-app-pub-1839004489502882/5403204607\",\"nativeAdmobId3\":\"ca-app-pub-1839004489502882/5366870537\",\"nativeAdmobId4\":\"ca-app-pub-1839004489502882/1975825402\",\"nativeAdmobId5\":\"ca-app-pub-1839004489502882/6545625803\",\"openAdsAdmobId\":\"ca-app-pub-1839004489502882/1800035353\",\"interAoaAdsAdmobId\":\"ca-app-pub-1839004489502882/9913910235\",\"interMediationAdsAdmobId\":\"ca-app-pub-1839004489502882/4625299811\",\"interApplovinId\":\"X\",\"interIronSourceId\":\"X\",\"isAoaType\":false,\"interFakeAoaType\":1,\"isOnBanner\":false,\"isOnCollapsible\":false,\"isOnNative\":true,\"nativeRefreshTimer\":10,\"nativeWidth\":720,\"nativeHeight\":400,\"isDraggable\":true,\"isDismissible\":true,\"interAdsType\":1,\"interAdsDelayTimer\":12,\"interAdsLoopTimer\":180,\"nativeRatioHeightScreen\":0.15,\"nativeRatioWidthScreen\":0.3,\"nativeRatioClick\":1.1}";
+    private static String jsonDefault = "";
     SharedPreferences sharedPreferences;
 
     private  Dialog adDialog;
@@ -169,6 +170,12 @@ public class Vietnq308Activity {
     private boolean isFailMrecBanner = false;
     private boolean isLimitStartTime = true;
     private int openAdDelayTimer = 30 *1000;
+
+    private boolean isNativeLoading = false;
+    private boolean isAoaLoading = false;
+
+    private boolean isInterLoading = false;
+
     public Vietnq308Activity(MainActivity mainActivity) {
         this.activity_context = mainActivity;
         fetchingAPIconfig();
@@ -272,22 +279,22 @@ public class Vietnq308Activity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.i(TAG, "===============API REQUEST SUCCESS=================\n" );
+                        Log.i(TAG, "===============Lấy API thành cmn công=================\n" );
                         parseAPIResponse(response);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.i(TAG, "===============API REQUEST FAILED=================\n" );
-                        Log.i(TAG, "===============SEVER DOWN ALERT=================\n" );
+                        Log.i(TAG, "===============Lấy API thất bại (mẹ của thành công)=================\n" );
+                        Log.i(TAG, "===============Khả năng là sever down đấy=================\n" );
                         String retrievedJsonString = sharedPreferences.getString("json_default", jsonDefault);
                         if (retrievedJsonString != null) {
                             parseAPIResponse(retrievedJsonString);
-                            Log.i(TAG, "PARSE OLD DATA " +  retrievedJsonString);
+                            Log.i(TAG, "Lấy tạm fuwx liệu cũ : " +  retrievedJsonString);
                         } else {
                             parseAPIResponse(jsonDefault);
-                            Log.i(TAG, "PARSE DEFAULT DATA " +  jsonDefault);
+                            Log.i(TAG, "Lấy dữ liệu mặc định vậy : " +  jsonDefault);
                         }
                     }
                 }));
@@ -454,11 +461,11 @@ public class Vietnq308Activity {
             isLimitStartTime = jsonResult.getBoolean("isLimitStartTime");
             openAdDelayTimer = jsonResult.getInt("openAdDelayTimer") * 1000;
 
-            Log.i(TAG,"ADD DATA LOG : |||||||||||||||| " + response);
+            Log.i(TAG,"Thêm data vào : |||||||||||||||| " + response);
             initializeAdsWithApi();
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("json_default", response);
-            Log.i(TAG, "SAVE LOG : |||||||||||||||| " + response );
+            Log.i(TAG, "Lưu lại dữ liệu : |||||||||||||||| " + response );
             editor.apply();
         } catch (Exception e) {
             String a = "{\"policyMode\":true,\"ironsourceDevKey\":\"X\",\"bannerAdmobId\":\"ca-app-pub-1839004489502882/7208738692\",\"mrecAdmobId\":\"ca-app-pub-1839004489502882/2085806899\",\"nativeAdmobId\":\"ca-app-pub-1839004489502882/4638967989\",\"openAdsAdmobId\":\"ca-app-pub-1839004489502882/4921486702\",\"interAoaAdsAdmobId\":\"ca-app-pub-1839004489502882/7040383586\",\"interMediationAdsAdmobId\":\"ca-app-pub-1839004489502882/7547650041\",\"interApplovinId\":\"x\",\"bannerApplovinId\":\"x\",\"openApplovinId\":\"x\",\"interIronSourceId\":\"X\",\"isAoaType\":false,\"interFakeAoaType\":1,\"isOnBanner\":false,\"isOnCollapsible\":false,\"isOnNative\":true,\"nativeRefreshTimer\":30,\"interAdsType\":1,\"interAdsDelayTimer\":12,\"interAdsLoopTimer\":189,\"nativeRatioHeightScreen\":0.15,\"nativeRatioWidthScreen\":0.4,\"nativeRatioClick\":1.67,\"isLimitStartTime\": true,\"openAdDelayTimer\": 30}";
@@ -466,10 +473,10 @@ public class Vietnq308Activity {
             String retrievedJsonString = sharedPreferences.getString("json_default", jsonDefault);
             if (retrievedJsonString != null) {
                 parseAPIResponse(retrievedJsonString);
-                Log.i(TAG, "PARSE OLD DATA " +  retrievedJsonString);
+                Log.i(TAG, "Lấy dữ liệu cũ " +  retrievedJsonString);
             } else {
                 parseAPIResponse(jsonDefault);
-                Log.i(TAG, "PARSE DEFAULT DATA " +  jsonDefault);
+                Log.i(TAG, "Lấy dữ liệu mặc định " +  jsonDefault);
             }
         }
     }
@@ -493,7 +500,7 @@ public class Vietnq308Activity {
         MobileAds.initialize(this.activity_context, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
-                Log.i(TAG, "===============INIT ADMOB SUCCESS=================\n" );
+                Log.i(TAG, "===============Khởi tạo ADMOB thành công=================\n" );
             }
         });
         List<String> testDeviceIds = Arrays.asList("8B4E3A1BD78D05CFF2967770656D5EF8");
@@ -515,41 +522,41 @@ public class Vietnq308Activity {
 
         Observable.interval(5000,5000, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribeWith(new Observer<Long>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {}
-                    @Override
-                    public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {}
-                    @Override
-                    public void onComplete() {}
-                    @Override
-                    public void onNext(@io.reactivex.rxjava3.annotations.NonNull Long aLong) {
-                        timePlayed = timePlayed + 5000;
+                                                                                                          @Override
+                                                                                                          public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {}
+                                                                                                          @Override
+                                                                                                          public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {}
+                                                                                                          @Override
+                                                                                                          public void onComplete() {}
+                                                                                                          @Override
+                                                                                                          public void onNext(@io.reactivex.rxjava3.annotations.NonNull Long aLong) {
+                                                                                                              timePlayed = timePlayed + 5000;
 
-                        remainingTimer = remainingTimer- 5000;
-                        timerOpenAdsCanShow = timerOpenAdsCanShow- 5000;
-                        Log.i(TAG, "INTER - " + String.valueOf(remainingTimer) + " AOA - " + String.valueOf(timerOpenAdsCanShow));
-                        if (remainingTimer < 0 && !isAppOnBackground  && isAoaFinish && isInterFinish && !is_ads_removed){
-                            Completable.timer(1L, TimeUnit.SECONDS, AndroidSchedulers.mainThread()).subscribe(new Action() { // from class: com.mojang.minecraftpe.ISC.6
-                                @Override // io.reactivex.rxjava3.functions.Action
-                                public final void run() {
-                                    Log.i(TAG, "===============INTER INCOMING SHOW=================\n" );
-                                    if (policyMode) {
-                                        createDialogInterAdmob();
-                                    } else {
-                                        showInterAdmobAd();
-                                    }
-                                }
-                            });
-                        }
-                        boolean isShowAlertDialog = false;
-                        if (alertDialog != null) {
-                            isShowAlertDialog = alertDialog.isShowing();
-                        }
-                        if (isOnNative && !isShowAlertDialog) {
-                            showNativeAdDialog();
-                        }
-                    }
-                }
+                                                                                                              remainingTimer = remainingTimer- 5000;
+                                                                                                              timerOpenAdsCanShow = timerOpenAdsCanShow- 5000;
+                                                                                                              Log.i(TAG, "INTER đếm giây : " + String.valueOf(remainingTimer) + " AOA đếm giây: " + String.valueOf(timerOpenAdsCanShow));
+                                                                                                              if (remainingTimer < 0 && !isAppOnBackground  && isAoaFinish && isInterFinish && !is_ads_removed){
+                                                                                                                  Completable.timer(1L, TimeUnit.SECONDS, AndroidSchedulers.mainThread()).subscribe(new Action() { // from class: com.mojang.minecraftpe.ISC.6
+                                                                                                                      @Override // io.reactivex.rxjava3.functions.Action
+                                                                                                                      public final void run() {
+                                                                                                                          Log.i(TAG, "===============INTER chuẩn bị hiện lên=================\n" );
+                                                                                                                          if (policyMode) {
+                                                                                                                              createDialogInterAdmob();
+                                                                                                                          } else {
+                                                                                                                              showInterAdmobAd();
+                                                                                                                          }
+                                                                                                                      }
+                                                                                                                  });
+                                                                                                              }
+                                                                                                              boolean isShowAlertDialog = false;
+                                                                                                              if (alertDialog != null) {
+                                                                                                                  isShowAlertDialog = alertDialog.isShowing();
+                                                                                                              }
+                                                                                                              if (isOnNative && !isShowAlertDialog) {
+                                                                                                                  showNativeAdDialog();
+                                                                                                              }
+                                                                                                          }
+                                                                                                      }
                 );
     }
 
@@ -567,10 +574,10 @@ public class Vietnq308Activity {
 
         if (isFailMrecBanner) {
             adBannerView.setAdSize(AdSize.LARGE_BANNER);
-            Log.i("VIETNQ308", "================================= set BANNER is 320x100");
+            Log.i("VIETNQ308", "================================= đặt kích thước banner là  320x100");
         } else {
             adBannerView.setAdSize(AdSize.MEDIUM_RECTANGLE);
-            Log.i("VIETNQ308", "================================= set BANNER is 300x250");
+            Log.i("VIETNQ308", "================================= đặt kích thước banner là  300x250");
         }
 
         adBannerView.setAdUnitId(mrecAdmobId);
@@ -609,9 +616,9 @@ public class Vietnq308Activity {
 
             @Override
             public void onAdFailedToLoad(LoadAdError adError) {
-                Log.e("VIETNQ308", "================================= BANNER is FAILED"+ adError);
+                Log.e("VIETNQ308", "================================= Tải banner thất bại"+ adError);
                 isFailMrecBanner = true;
-                Log.e("VIETNQ308", "================================= set adview 320x100 for load later");
+                Log.e("VIETNQ308", "================================= Đặt size banner thành 320x100 cho lần sau");
             }
 
             @Override
@@ -619,15 +626,15 @@ public class Vietnq308Activity {
 
             @Override
             public void onAdLoaded() {
-                Log.e("VIETNQ308", "================================= BANNER is LOADED");
-                Log.e("VIETNQ308", "================================= BANNER loaded is type " + (isFailMrecBanner ? "320x100" : "300x250"));
-                Log.e("VIETNQ308", "================================= set adview 300x250 for load later");
+                Log.e("VIETNQ308", "================================= BANNER load thành công rồi ");
+                Log.e("VIETNQ308", "================================= BANNER này đang là dạng " + (isFailMrecBanner ? "320x100" : "300x250"));
+                Log.e("VIETNQ308", "================================= Chỉnh lại thành loại 300x250 cho lần sau");
                 isFailMrecBanner = false;
             }
 
             @Override
             public void onAdOpened() {
-                Log.e("VIETNQ308", "================================= BANNER is OPENED");
+                Log.e("VIETNQ308", "================================= Banner được mở");
             }
         });
     }
@@ -791,10 +798,10 @@ public class Vietnq308Activity {
                 }, 4000);
 
             } else {
-                Log.i(TAG, "===============INTER ADS CANT SHOW=================\n" );
-                Log.i(TAG, "interAdmobAd status :" + (interAdmobAd == null ? "not available" : "available") );
-                Log.i(TAG, "AoaFinish" + isAoaFinish);
-                Log.i(TAG, "InterFinish" + isInterFinish);
+                Log.i(TAG, "===============INTER Không thể hiện ra, xem lý do dưới đây : =================\n" );
+                Log.i(TAG, "---- tình trạng thằng inter :" + (interAdmobAd == null ? "Không có sẵn" : "có sẵn") );
+                Log.i(TAG, "---- Thằng OpenAds đã hoàn thành chưa (không bị che): " + (isAoaFinish ? "Đúng" : "Sai" ));
+                Log.i(TAG, "---- Thằng Inter đã hoàn thành chưa (không bị che): " + (isInterFinish ? "Đúng" : "Sai"));
                 loadInterAdmobAds();
                 return;
             }
@@ -892,11 +899,11 @@ public class Vietnq308Activity {
         if (is_ads_removed) {
             return;
         }
-        Log.i("VIETNQ308", "NATIVE COUNTER ==========   "+ String.valueOf(nativeCounterTimer) + " || native1 status: " + (cacheNativeAd==null ? "null" : "available"));
+        Log.i("VIETNQ308", "NATIVE bộ đếm giây : "+ String.valueOf(nativeCounterTimer) + " || Lưu trữ Native tình trạng: " + (cacheNativeAd==null ? "Không có sẵn" : "có sẵn"));
         nativeCounterTimer = nativeCounterTimer - 5000;
         if (nativeCounterTimer < 0 && !is_ads_removed) {
             if (cacheNativeAd != null ) {
-                Log.i("VIETNQ308", "SHOW NATIVE 1");
+                Log.i("VIETNQ308", "Hiện lên NATIVE (làm mới)");
                 showNativeDialog(cacheNativeAd);
             } else {
                 loadNativeAd1();
@@ -927,7 +934,8 @@ public class Vietnq308Activity {
 //        return nativePicked;
 //    }
     private void loadNativeAd1() {
-        if (cacheNativeAd == null) {
+        if (cacheNativeAd == null && !isNativeLoading) {
+            isNativeLoading = true;
             String nativeId = nativeAdmobId;
             AdLoader adLoader = new AdLoader.Builder(activity_context, nativeId)
                     .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
@@ -955,20 +963,22 @@ public class Vietnq308Activity {
 
                             numberRetryNative = 0;
                             cacheNativeAd = nativeAd;
+                            isNativeLoading = false;
 //                            if (cacheNativeAd2 == null) {
 //                                loadNativeAd2();
 //                            }
-                            Log.i("VIETNQ308", "LOADED NATIVE1 SUCCESSFULLY");
+                            Log.i("VIETNQ308", "Native đã tải thành công về");
                         }
                     })
                     .withAdListener(new AdListener() {
                         @Override
                         public void onAdFailedToLoad(LoadAdError adError) {
-                            Log.e("VIETNQ308", "FAILED LOAD NATIVE1"+ String.valueOf(adError));
+                            isNativeLoading = false;
+                            Log.e("VIETNQ308", "Thằng Native tải về thất bại rồi ông giáo ạ"+ String.valueOf(adError));
                             numberRetryNative = numberRetryNative +1;
                             if (nativeCounterTimer < 0 ) {
                                 nativeCounterTimer = 10000*numberRetryNative*numberRetryNative;
-                                Log.e("VIETNQ308", "NATIVE1 LOAD AFTER: "+ String.valueOf(nativeCounterTimer) + "TIMES:" +String.valueOf(numberRetryNative));
+                                Log.e("VIETNQ308", "Tải lại thằng native sau số giây: "+ String.valueOf(nativeCounterTimer) + " lần thứ :" +String.valueOf(numberRetryNative));
                             }
                         }
                     })
@@ -1030,7 +1040,7 @@ public class Vietnq308Activity {
             if (adDialog != null) {
                 adDialog.dismiss();
             }
-            Log.i("VIETNQ308",   "LOADED ! START LOADING NATIVE SETUP:" + nativeAd);
+            Log.i("VIETNQ308",   "Đang trong quá trình cài đặt native lên dialog" + nativeAd);
             adDialog = new Dialog(activity_context);
             adDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             adDialog.setContentView(R.layout.dialog_ad_layout);
@@ -1197,8 +1207,8 @@ public class Vietnq308Activity {
             }
             nativeCounterTimer = nativeRefreshTimer;
             cacheNativeAd = null;
-            Log.i(TAG, "CLEAR NATIVE" );
-            loadNativeAd1();
+            Log.i(TAG, "Xoá lưu trữ Native cũ" );
+//            loadNativeAd1();
 //            if (nativeAd == cacheNativeAd1) {
 //                cacheNativeAd1 = null;
 //                Log.i(TAG, "CLEAR NATIVE 1" );
@@ -1292,7 +1302,7 @@ public class Vietnq308Activity {
     public void onResumeApp() {
         if (isCalledOnResumeCreate && isInterFinish && isAoaFinish && !is_ads_removed) {
             if (interAdsType == 1) {
-                Log.i(TAG, "===============OPEN ADMOB ADS INCOMING SHOW=================\n" );
+                Log.i(TAG, "===============OPEN ADS chuẩn bị được gọi hiện lên này=================\n" );
                 showOpenAdmobAdIfAvailable();
             }
             if (interAdsType == 2) {
@@ -1322,209 +1332,216 @@ public class Vietnq308Activity {
         if (interAdmobAd != null && isAoaFinish && isInterFinish) {
             interAdmobAd.show(this.activity_context);
         } else {
-            Log.i(TAG, "===============INTER ADS CANT SHOW=================\n" );
-            Log.i(TAG, "interAdmobAd status :" + (interAdmobAd == null ? "not available" : "available") );
-            Log.i(TAG, "AoaFinish" + isAoaFinish);
-            Log.i(TAG, "InterFinish" + isInterFinish);
-            loadInterAdmobAds();
+            Log.i(TAG, "===============INTER không hiện được lên, xem lý do bên dưới =================\n" );
+            Log.i(TAG, "Tình trạng Inter :" + (interAdmobAd == null ? "Không có sẵn" : "có sẵn") );
+            Log.i(TAG, "---- Thằng OpenAds đã hoàn thành chưa (không bị che): " + (isAoaFinish ? "Đúng" : "Sai" ));
+            Log.i(TAG, "---- Thằng Inter đã hoàn thành chưa (không bị che): " + (isInterFinish ? "Đúng" : "Sai"));
+            if (isAoaFinish && isInterFinish) {
+                loadInterAdmobAds();
+                Log.i(TAG, "===============Load lại thằng Inter vì nó không có sẵn=================\n" );
+            }
         }
     }
     private void loadInterAdmobAds() {
-        if (interAdmobAd != null) {
-            return;
-        }
-        AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(this.activity_context, (isFirstOpenApp && !isAoaType) ? interAoaAdsAdmobId : interMediationAdsAdmobId, adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        Log.i(TAG, "===============INTER LOADED=================\n" );
-                        interAdmobAd = interstitialAd;
-                        interAdmobAd.setOnPaidEventListener(
-                            new OnPaidEventListener() {
-                                @Override
-                                public void onPaidEvent(@NonNull AdValue adValue) {
-                                    Map<String, String> customParams = new HashMap<>();
-                                    customParams.put(Scheme.AD_UNIT, interstitialAd.getAdUnitId());
-                                    customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.INTERSTITIAL.toString());
-                                    customParams.put("ad_platform", "Admob");
-                                    customParams.put("value", String.valueOf(adValue.getValueMicros()));
+        if (interAdmobAd == null && !isInterLoading) {
+            isInterLoading = true;
+            Log.i(TAG, (isFirstOpenApp && !isAoaType) ? "====Đang load thằng inter AOA nhé =====\n" : "==== Đang load thằng inter Mediation nhé=====\n" );
+            AdRequest adRequest = new AdRequest.Builder().build();
+            InterstitialAd.load(this.activity_context, (isFirstOpenApp && !isAoaType) ? interAoaAdsAdmobId : interMediationAdsAdmobId, adRequest,
+                    new InterstitialAdLoadCallback() {
+                        @Override
+                        public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                            isInterLoading = false;
+                            Log.i(TAG, "===============Inter load thành công rồi ông giáo =================\n" );
+                            interAdmobAd = interstitialAd;
+                            interAdmobAd.setOnPaidEventListener(
+                                    new OnPaidEventListener() {
+                                        @Override
+                                        public void onPaidEvent(@NonNull AdValue adValue) {
+                                            Map<String, String> customParams = new HashMap<>();
+                                            customParams.put(Scheme.AD_UNIT, interstitialAd.getAdUnitId());
+                                            customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.INTERSTITIAL.toString());
+                                            customParams.put("ad_platform", "Admob");
+                                            customParams.put("value", String.valueOf(adValue.getValueMicros()));
 
-                                    // Actually recording a single impression
-                                    AppsFlyerAdRevenue.logAdRevenue(
-                                            "admob",
-                                            MediationNetwork.googleadmob,
-                                            Currency.getInstance(Locale.US),
-                                            (double) adValue.getValueMicros(),
-                                            customParams
-                                    );
-                                }
-                            }
-                        );
-                        interAdmobAd.setFullScreenContentCallback(
-                                new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        Log.i(TAG, "===============INTER FINISH=================\n" );
-                                        if (isFirstOpenApp) {
-                                            isFirstOpenApp = false;
-                                            remainingTimer = interAdsDelayTimer;
-                                        } else {
-                                            remainingTimer = interAdsLoopTimer;
+                                            // Actually recording a single impression
+                                            AppsFlyerAdRevenue.logAdRevenue(
+                                                    "admob",
+                                                    MediationNetwork.googleadmob,
+                                                    Currency.getInstance(Locale.US),
+                                                    (double) adValue.getValueMicros(),
+                                                    customParams
+                                            );
                                         }
-                                        Log.d("LOG","SET DELAY :" + remainingTimer);
-                                        interAdmobAd = null;
-                                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                isInterFinish = true;
+                                    }
+                            );
+                            interAdmobAd.setFullScreenContentCallback(
+                                    new FullScreenContentCallback() {
+                                        @Override
+                                        public void onAdDismissedFullScreenContent() {
+                                            Log.i(TAG, (isFirstOpenApp && !isAoaType) ? "==== Kết thúc 1 inter AOA =====\n" : "==== Kết thúc 1 inter Mediation =====\n" );
+                                            if (isFirstOpenApp) {
+                                                isFirstOpenApp = false;
+                                                remainingTimer = interAdsDelayTimer;
+                                            } else {
+                                                remainingTimer = interAdsLoopTimer;
                                             }
-                                        }, 1000);
-                                        loadInterAdmobAds();
-                                    }
+                                            Log.d("LOG","SET DELAY :" + remainingTimer);
+                                            interAdmobAd = null;
+                                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    isInterFinish = true;
+                                                }
+                                            }, 1000);
+                                        }
 
-                                    @Override
-                                    public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                        Vietnq308Activity.interAdmobAd = null;
-                                    }
+                                        @Override
+                                        public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                            interAdmobAd = null;
+                                            Log.d("LOG","Inter này hiện lên bị lỗi, lỗi hiếm lắm đấy ");
+                                        }
 
-                                    @Override
-                                    public void onAdShowedFullScreenContent() {
-                                        isInterFinish = false;
-                                        Log.d("LOG","onAdShowedFullScreenContent: ");
-                                    }
-                                });
-                        if (interFakeAoaType == 1 && !isAoaType && isFirstOpenApp && !isTooLateForAds) {
-                            showInterAdmobAd();
-                            Log.i(TAG, "===============INTER AOA SHOWING=================\n" );
+                                        @Override
+                                        public void onAdShowedFullScreenContent() {
+                                            isInterFinish = false;
+                                            Log.d("LOG","Inter này hiện lên cả màn hình rồi này ");
+                                        }
+                                    });
+                            if (interFakeAoaType == 1 && !isAoaType && isFirstOpenApp && !isTooLateForAds) {
+                                showInterAdmobAd();
+                                Log.i(TAG, "===============Hiện lên thằng inter AOA ngay lập tức nè=================\n" );
+                            }
                         }
-                    }
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        Log.i(TAG, "===============INTER LOAD FAILED=================\n" + loadAdError  );
-                        interAdmobAd = null;
-                    }
-                });
+                        @Override
+                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                            isInterLoading = false;
+                            // Handle the error
+                            Log.i(TAG, "===============Inter tải về thất bại rồi ông giáo ạ =================\n" + loadAdError  );
+                            interAdmobAd = null;
+                        }
+                    });
+        }
     }
 
     private void loadOpenAdmobAds() {
-        if (openAdmobAd != null) {
-           return;
-        }
-        AdRequest request = new AdRequest.Builder().build();
-        AppOpenAd.load(this.activity_context, openAdsAdmobId, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE,
-                new AppOpenAd.AppOpenAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(AppOpenAd ad) {
-                        Log.i(TAG, "===============OPEN ADS LOADED=================\n" );
-                        // Called when an app open ad has loaded.
-                        numberRetryOpenAd = 0;
-                        openAdmobAd = ad;
-                        openAdmobAd.setOnPaidEventListener(
-                                new OnPaidEventListener() {
-                                    @Override
-                                    public void onPaidEvent(@NonNull AdValue adValue) {
-                                        Map<String, String> customParams = new HashMap<>();
-                                        customParams.put(Scheme.AD_UNIT, openAdmobAd.getAdUnitId());
-                                        customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.APP_OPEN.toString());
-                                        customParams.put("ad_platform", "Admob");
-                                        customParams.put("value", String.valueOf(adValue.getValueMicros()));
+        if (openAdmobAd == null && !isAoaLoading) {
+            isAoaLoading = true;
+            Log.i(TAG, "===============Open Ads đang tải về đợi tý =================\n" );
+            AdRequest request = new AdRequest.Builder().build();
+            AppOpenAd.load(this.activity_context, openAdsAdmobId, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE,
+                    new AppOpenAd.AppOpenAdLoadCallback() {
+                        @Override
+                        public void onAdLoaded(AppOpenAd ad) {
+                            isAoaLoading = false;
+                            Log.i(TAG, "===============Open Ads tải về thành công rồi nhé ông giáo =================\n" );
+                            // Called when an app open ad has loaded.
+                            numberRetryOpenAd = 0;
+                            openAdmobAd = ad;
+                            openAdmobAd.setOnPaidEventListener(
+                                    new OnPaidEventListener() {
+                                        @Override
+                                        public void onPaidEvent(@NonNull AdValue adValue) {
+                                            Map<String, String> customParams = new HashMap<>();
+                                            customParams.put(Scheme.AD_UNIT, openAdmobAd.getAdUnitId());
+                                            customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.APP_OPEN.toString());
+                                            customParams.put("ad_platform", "Admob");
+                                            customParams.put("value", String.valueOf(adValue.getValueMicros()));
 
-                                        // Actually recording a single impression
-                                        AppsFlyerAdRevenue.logAdRevenue(
-                                                "admob",
-                                                MediationNetwork.googleadmob,
-                                                Currency.getInstance(Locale.US),
-                                                (double) adValue.getValueMicros(),
-                                                customParams
-                                        );
-                                    }
-                                }
-                        );
-                        openAdmobAd.setFullScreenContentCallback(
-                                new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        Log.i(TAG, "===============OPEN ADS FINISHED=================\n" );
-                                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                isAoaFinish = true;
-                                                timerOpenAdsCanShow = openAdDelayTimer;
-                                            }
-                                        }, 1000);
-                                        if (isFirstOpenApp) {
-                                            isFirstOpenApp = false;
-                                            remainingTimer = interAdsDelayTimer;
+                                            // Actually recording a single impression
+                                            AppsFlyerAdRevenue.logAdRevenue(
+                                                    "admob",
+                                                    MediationNetwork.googleadmob,
+                                                    Currency.getInstance(Locale.US),
+                                                    (double) adValue.getValueMicros(),
+                                                    customParams
+                                            );
                                         }
-                                        openAdmobAd = null;
-                                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                if (policyMode) {
-                                                    if (alertDialog != null) {
-                                                        alertDialog.show();
-                                                    } else if (adDialog != null) {
-                                                        adDialog.show();
-                                                    }
-                                                } else {
-                                                    if (adDialog != null) {
-                                                        adDialog.show();
+                                    }
+                            );
+                            openAdmobAd.setFullScreenContentCallback(
+                                    new FullScreenContentCallback() {
+                                        @Override
+                                        public void onAdDismissedFullScreenContent() {
+                                            Log.i(TAG, "=============== Open Ads cút khỏi màn hình rồi ông giáo  =================\n" );
+                                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    isAoaFinish = true;
+                                                    timerOpenAdsCanShow = openAdDelayTimer;
+                                                }
+                                            }, 1000);
+                                            if (isFirstOpenApp) {
+                                                isFirstOpenApp = false;
+                                                remainingTimer = interAdsDelayTimer;
+                                            }
+                                            openAdmobAd = null;
+                                            loadOpenAdmobAds();
+                                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (policyMode) {
+                                                        if (alertDialog != null) {
+                                                            alertDialog.show();
+                                                        } else if (adDialog != null) {
+                                                            adDialog.show();
+                                                        }
+                                                    } else {
+                                                        if (adDialog != null) {
+                                                            adDialog.show();
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        }, 1000);
+                                            }, 1000);
+                                        }
+                                        public void onAdFailedToShowFullScreenContent(@NonNull AdError var1) {
+                                            isAoaFinish = true;
+                                        }
 
+                                        public void onAdImpression() {
+                                            // firebase
+                                        }
 
-                                        loadInterAdmobAds();
-                                    }
-                                    public void onAdFailedToShowFullScreenContent(@NonNull AdError var1) {
-                                        isAoaFinish = true;
-                                    }
-
-                                    public void onAdImpression() {
-                                        // firebase
-                                    }
-
-                                    public void onAdShowedFullScreenContent() {
-                                        isAoaFinish = false;
-                                        if (adDialog != null) {
-                                            adDialog.hide();
-                                            if (adDialog.isShowing()) {
+                                        public void onAdShowedFullScreenContent() {
+                                            isAoaFinish = false;
+                                            if (adDialog != null) {
                                                 adDialog.hide();
+                                                if (adDialog.isShowing()) {
+                                                    adDialog.hide();
+                                                }
                                             }
-                                        }
-                                        if ( alertDialog != null ) {
-                                            alertDialog.hide();
-                                            if (alertDialog.isShowing()) {
+                                            if ( alertDialog != null ) {
                                                 alertDialog.hide();
+                                                if (alertDialog.isShowing()) {
+                                                    alertDialog.hide();
+                                                }
                                             }
                                         }
                                     }
-                                }
-                        );
-                        if (isFirstOpenApp && isAoaType && !isTooLateForAds) {
-                            showOpenAdmobAdIfAvailable();
+                            );
+                            if (isFirstOpenApp && isAoaType && !isTooLateForAds) {
+                                showOpenAdmobAdIfAvailable();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError loadAdError) {
-                        numberRetryOpenAd = numberRetryOpenAd +1;
-                        if (numberRetryOpenAd <= 3) {
-                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.i(TAG, "===============OPEN ADS LOAD FAILED and retry after "+ 5000*numberRetryOpenAd + "=================\n"  + loadAdError );
-                                    loadOpenAdmobAds();
-                                }
-                            }, 5000*numberRetryOpenAd);
-                        } else {
-                            Log.i(TAG, "===============OPEN ADS LOAD FAILED and can not retry=================\n"  + loadAdError  );
+                        @Override
+                        public void onAdFailedToLoad(LoadAdError loadAdError) {
+                            isAoaLoading = false;
+                            numberRetryOpenAd = numberRetryOpenAd +1;
+                            if (numberRetryOpenAd <= 3) {
+                                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i(TAG, "===============OPEN ADS tải thất bại rồi, tại lại sau số giây : "+ 5000*numberRetryOpenAd + "=================\n"  + loadAdError );
+                                        loadOpenAdmobAds();
+                                    }
+                                }, 5000*numberRetryOpenAd);
+                            } else {
+                                Log.i(TAG, "===============OPEN ADS tải thất bại quá nhiều lần, không load lại nữa đâu================\n"  + loadAdError  );
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
     void showOpenAdmobAdIfAvailable() {
@@ -1547,11 +1564,13 @@ public class Vietnq308Activity {
             }
             openAdmobAd.show(this.activity_context);
         } else {
-            Log.i(TAG, "===============OPEN ADS CANT SHOW=================\n" );
-            Log.i(TAG, "openAdmobAd status :" + (openAdmobAd == null ? "not available" : "available") );
-            Log.i(TAG, "AoaFinish" + isAoaFinish);
-            Log.i(TAG, "InterFinish" + isInterFinish);
-            loadOpenAdmobAds();
+            Log.i(TAG, "===============OPEN ADS không hiện lên được, xem lý do phía dưới : =================\n" );
+            Log.i(TAG, "Tình trạng của thằng OPEN ADS :" + (openAdmobAd == null ? "Không có sẵn" : "có sẵn") );
+            Log.i(TAG, "---- Thằng OpenAds đã hoàn thành chưa (không bị che): " + (isAoaFinish ? "Đúng" : "Sai" ));
+            Log.i(TAG, "---- Thằng Inter đã hoàn thành chưa (không bị che): " + (isInterFinish ? "Đúng" : "Sai"));
+            if (isAoaFinish && isInterFinish) {
+                loadOpenAdmobAds();
+            }
 //            if (alertDialog != null) {
 //                alertDialog.show();
 //            } else if (adDialog != null) {
@@ -1637,7 +1656,7 @@ public class Vietnq308Activity {
     private void initializeApplovinAds() {
         AppLovinSdk.getInstance(this.activity_context).setMediationProvider("max");
         AppLovinSdk.getInstance(this.activity_context).initializeSdk(configuration -> {
-            showAOAInterAdmob();
+//            showAOAInterAdmob();
             remainingTimer = interAdsLoopTimer;
             createInterApplovinAd();
             createOpenAdsApplovinAd();
