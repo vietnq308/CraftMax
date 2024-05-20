@@ -30,6 +30,3 @@ public class MainActivity extends Activity {
         vietnq308Activity.onPauseApp();
     }
 }
-
-
-
