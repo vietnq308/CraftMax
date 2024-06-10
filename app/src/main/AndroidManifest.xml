@@ -15,11 +15,9 @@
         android:theme="@style/Theme.CraftMAX"
         tools:targetApi="31"
         tools:replace="android:fullBackupContent">
-        <meta-data android:name="applovin.sdk.key"
-            android:value="tLDN-4zvZMQH-2GVQZJDCM9m64JGikmI2deEhULNkz2EALdgz3SnrbOlIHXkqZvqIg5FCvD5hodyKRk4FQle9h"/>
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1839004489502882~8278746009"/>
+            android:value="ca-app-pub-8683682773656447~3427248038"/>
         <meta-data
             android:name="com.google.android.gms.ads.AD_MANAGER_APP"
             android:value="true"/>

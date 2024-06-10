@@ -43,6 +43,7 @@ import com.appsflyer.adrevenue.AppsFlyerAdRevenue;
 import com.appsflyer.adrevenue.adnetworks.AppsFlyerAdNetworkEventType;
 import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork;
 import com.appsflyer.adrevenue.adnetworks.generic.Scheme;
+import com.facebook.ads.AudienceNetworkAds;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.ads.nativetemplates.NativeTemplateStyle;
 import com.google.android.ads.nativetemplates.TemplateView;
@@ -274,7 +275,7 @@ public class Vietnq308Activity {
 //                    }
 //                });
 
-        String apiUrl = "https://craft.gafugame.com/api/rmc_k.jsp?access-key=316def69-420c-42e6-aa6d-c8c47e1ad5ea&key=test_id";
+        String apiUrl = "https://craft.gafugame.com/api/rmc_k.jsp?access-key=f7cf4973-1c02-46dc-bbca-b038eed6893f&key=config_ver1";
         Volley.newRequestQueue(this.activity_context).add(new StringRequest(Request.Method.GET, apiUrl,
                 new Response.Listener<String>() {
                     @Override
@@ -468,7 +469,6 @@ public class Vietnq308Activity {
             Log.i(TAG, "Lưu lại dữ liệu : |||||||||||||||| " + response );
             editor.apply();
         } catch (Exception e) {
-            String a = "{\"policyMode\":true,\"ironsourceDevKey\":\"X\",\"bannerAdmobId\":\"ca-app-pub-1839004489502882/7208738692\",\"mrecAdmobId\":\"ca-app-pub-1839004489502882/2085806899\",\"nativeAdmobId\":\"ca-app-pub-1839004489502882/4638967989\",\"openAdsAdmobId\":\"ca-app-pub-1839004489502882/4921486702\",\"interAoaAdsAdmobId\":\"ca-app-pub-1839004489502882/7040383586\",\"interMediationAdsAdmobId\":\"ca-app-pub-1839004489502882/7547650041\",\"interApplovinId\":\"x\",\"bannerApplovinId\":\"x\",\"openApplovinId\":\"x\",\"interIronSourceId\":\"X\",\"isAoaType\":false,\"interFakeAoaType\":1,\"isOnBanner\":false,\"isOnCollapsible\":false,\"isOnNative\":true,\"nativeRefreshTimer\":30,\"interAdsType\":1,\"interAdsDelayTimer\":12,\"interAdsLoopTimer\":189,\"nativeRatioHeightScreen\":0.15,\"nativeRatioWidthScreen\":0.4,\"nativeRatioClick\":1.67,\"isLimitStartTime\": true,\"openAdDelayTimer\": 30}";
             Log.i(TAG, "===============FAILED TO PARSE DATA=================\n" + e );
             String retrievedJsonString = sharedPreferences.getString("json_default", jsonDefault);
             if (retrievedJsonString != null) {
@@ -507,6 +507,8 @@ public class Vietnq308Activity {
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
+        AudienceNetworkAds.initialize(activity_context);
+
         loadOpenAdmobAds();
         loadInterAdmobAds();
 
@@ -595,16 +597,17 @@ public class Vietnq308Activity {
                 customParams.put(Scheme.AD_UNIT, mrecAdmobId);
                 customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.BANNER.toString());
                 customParams.put("ad_platform", "Admob");
-                customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 
                 // Actually recording a single impression
                 AppsFlyerAdRevenue.logAdRevenue(
                         "admob",
                         MediationNetwork.googleadmob,
                         Currency.getInstance(Locale.US),
-                        (double) adValue.getValueMicros(),
+                        Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                         customParams
                 );
+                Log.i(TAG, customParams.toString());
             }
         });
         adBannerView.setAdListener(new AdListener() {
@@ -653,14 +656,14 @@ public class Vietnq308Activity {
 //                                    customParams.put(Scheme.AD_UNIT, nativeId);
 //                                    customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.NATIVE.toString());
 //                                    customParams.put("ad_platform", "Admob");
-//                                    customParams.put("value", String.valueOf(adValue.getValueMicros()));
+//                                    customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 //
 //                                    // Actually recording a single impression
 //                                    AppsFlyerAdRevenue.logAdRevenue(
 //                                            "Admob",
 //                                            MediationNetwork.googleadmob,
 //                                            Currency.getInstance(Locale.US),
-//                                            (double) adValue.getValueMicros(),
+//                                            Double.valueOf(adValue.getValueMicros() / 1000000.0d),
 //                                            customParams
 //                                    );
 //                                }
@@ -852,16 +855,17 @@ public class Vietnq308Activity {
                 customParams.put(Scheme.AD_UNIT, bannerAdmobId);
                 customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.BANNER.toString());
                 customParams.put("ad_platform", "Admob");
-                customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 
                 // Actually recording a single impression
                 AppsFlyerAdRevenue.logAdRevenue(
                         "admob",
                         MediationNetwork.googleadmob,
                         Currency.getInstance(Locale.US),
-                        (double) adValue.getValueMicros(),
+                        Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                         customParams
                 );
+                Log.i(TAG, customParams.toString());
             }
         });
         adDialog.setCancelable(false);
@@ -948,16 +952,17 @@ public class Vietnq308Activity {
                                     customParams.put(Scheme.AD_UNIT, nativeId);
                                     customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.NATIVE.toString());
                                     customParams.put("ad_platform", "Admob");
-                                    customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                                    customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 
                                     // Actually recording a single impression
                                     AppsFlyerAdRevenue.logAdRevenue(
                                             "Admob",
                                             MediationNetwork.googleadmob,
                                             Currency.getInstance(Locale.US),
-                                            (double) adValue.getValueMicros(),
+                                            Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                                             customParams
                                     );
+                                    Log.i(TAG, customParams.toString());
                                 }
                             });
 
@@ -1001,14 +1006,14 @@ public class Vietnq308Activity {
 //                                    customParams.put(Scheme.AD_UNIT, nativeId);
 //                                    customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.NATIVE.toString());
 //                                    customParams.put("ad_platform", "Admob");
-//                                    customParams.put("value", String.valueOf(adValue.getValueMicros()));
+//                                    customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 //
 //                                    // Actually recording a single impression
 //                                    AppsFlyerAdRevenue.logAdRevenue(
 //                                            "admob",
 //                                            MediationNetwork.googleadmob,
 //                                            Currency.getInstance(Locale.US),
-//                                            (double) adValue.getValueMicros(),
+//                                            Double.valueOf(adValue.getValueMicros() / 1000000.0d),
 //                                            customParams
 //                                    );
 //                                }
@@ -1362,16 +1367,17 @@ public class Vietnq308Activity {
                                             customParams.put(Scheme.AD_UNIT, interstitialAd.getAdUnitId());
                                             customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.INTERSTITIAL.toString());
                                             customParams.put("ad_platform", "Admob");
-                                            customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                                            customParams.put("value", String.valueOf((adValue.getValueMicros() / 1000000.0d)));
 
                                             // Actually recording a single impression
                                             AppsFlyerAdRevenue.logAdRevenue(
                                                     "admob",
                                                     MediationNetwork.googleadmob,
                                                     Currency.getInstance(Locale.US),
-                                                    (double) adValue.getValueMicros(),
+                                                    Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                                                     customParams
                                             );
+                                            Log.i(TAG, customParams.toString());
                                         }
                                     }
                             );
@@ -1446,16 +1452,17 @@ public class Vietnq308Activity {
                                             customParams.put(Scheme.AD_UNIT, openAdmobAd.getAdUnitId());
                                             customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.APP_OPEN.toString());
                                             customParams.put("ad_platform", "Admob");
-                                            customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                                            customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 
                                             // Actually recording a single impression
                                             AppsFlyerAdRevenue.logAdRevenue(
                                                     "admob",
                                                     MediationNetwork.googleadmob,
                                                     Currency.getInstance(Locale.US),
-                                                    (double) adValue.getValueMicros(),
+                                                    Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                                                     customParams
                                             );
+                                            Log.i(TAG, customParams.toString());
                                         }
                                     }
                             );
@@ -1599,16 +1606,17 @@ public class Vietnq308Activity {
                                                 customParams.put(Scheme.AD_UNIT, interstitialAd.getAdUnitId());
                                                 customParams.put(Scheme.AD_TYPE, AppsFlyerAdNetworkEventType.INTERSTITIAL.toString());
                                                 customParams.put("ad_platform", "Admob");
-                                                customParams.put("value", String.valueOf(adValue.getValueMicros()));
+                                                customParams.put("value", String.valueOf(adValue.getValueMicros() / 1000000.0d));
 
                                                 // Actually recording a single impression
                                                 AppsFlyerAdRevenue.logAdRevenue(
                                                         "admob",
                                                         MediationNetwork.googleadmob,
                                                         Currency.getInstance(Locale.US),
-                                                        (double) adValue.getValueMicros(),
+                                                        Double.valueOf(adValue.getValueMicros() / 1000000.0d),
                                                         customParams
                                                 );
+                                                Log.i(TAG, customParams.toString());
                                             }
                                         }
                                 );
@@ -1867,5 +1875,6 @@ public class Vietnq308Activity {
         float density = context.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
     }
+
 }
 
