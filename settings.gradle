@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "Craft MAX"
 include ':app'
 include ':nativetemplates'
+bro sao kéo git này về thế, xoá hộ tôi được thì càng tốt hoặc để private giúp tôi nhé 
